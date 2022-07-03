@@ -13,6 +13,7 @@ ENEMY_COUNT = 5
 window = display.set_mode((W, H))
 timer = time.Clock()
 backgroud = transform.scale(image.load('back.webp'), (W,H))
+game_over = transform.scale(image.load('game_over.jpg'), (W,H))
 
 randomEnemies = []
 
@@ -46,6 +47,13 @@ class Player(Sprite):
             self.rect.x -= self.speed
         if najatie_knopki[K_RIGHT] and self.rect.x < W - self.rect.w:
             self.rect.x += self.speed
+    def checkCollison(self):
+        if self.rect.colliderect(enemy.rect) == True:
+            return True
+        for e in randomEnemies:
+            if self.rect.colliderect(e.rect) == True:
+                return True
+        return False
 
 
 class Enemy(Sprite):
@@ -81,6 +89,7 @@ class Enemy(Sprite):
 
 
 
+
 myPlayer = Player('player.png', 50, 60, 0, 0, 5)
 enemy = Enemy('enemy.png', 50, 60, 400, 300, 3)
 
@@ -88,7 +97,8 @@ for i in range(ENEMY_COUNT):
     newEnemy = Enemy('fire.png', 50, 70, randint(0, W), randint(0, H), 3)
     randomEnemies.append(newEnemy)
 
-run = True
+isGame = True #Остановка движения
+run = True #Остановка всей игры целиком!
 while run:
     display.update()
 
@@ -97,15 +107,22 @@ while run:
             run = False
 
     myPlayer.move()
+    if myPlayer.checkCollison() == True:
+        isGame = False
+
     enemy.chase(myPlayer)
     for e in randomEnemies:
         e.move()
     #--------------------------------------------------
-    window.fill((0, 0, 0))
-    window.blit(backgroud, (0, 0))
-    myPlayer.draw()
-    enemy.draw()
-    for e in randomEnemies:
-        e.draw()
+
+    if isGame == True:
+        window.fill((0, 0, 0))
+        window.blit(backgroud, (0, 0))
+        myPlayer.draw()
+        enemy.draw()
+        for e in randomEnemies:
+            e.draw()
+    else:
+        window.blit(game_over, (0, 0))
 
     timer.tick(FPS)
